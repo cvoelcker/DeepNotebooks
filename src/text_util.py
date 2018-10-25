@@ -1,7 +1,7 @@
 import os.path
 from IPython.display import display, Markdown
 
-from deep_notebooks.nalgene.generate import fix_sentence, generate_from_file
+from src.nalgene.generate import fix_sentence, generate_from_file
 
 
 def printmd(string=''):

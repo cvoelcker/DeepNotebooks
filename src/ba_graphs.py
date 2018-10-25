@@ -1,9 +1,8 @@
 import itertools
 
 import numpy as np
-import igraph
 
-from deep_notebooks.ba_functions import get_correlation_matrix
+from src.ba_functions import get_correlation_matrix
 from spn.structure.Base import Leaf
 
 

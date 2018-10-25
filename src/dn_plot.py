@@ -1,4 +1,3 @@
-import igraph
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -6,7 +5,7 @@ import plotly.tools as tls
 import plotly.plotly as py
 from plotly.graph_objs import Heatmap, Layout, Scatter, Bar, Table, Histogram, ColorBar
 
-import deep_notebooks.ba_graphs as g
+import src.ba_graphs as g
 
 from spn.algorithms.Marginalization import marginalize
 from spn.structure.StatisticalTypes import Type

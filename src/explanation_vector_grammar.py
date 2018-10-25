@@ -2,8 +2,8 @@ from bisect import bisect_right as threshold
 
 import numpy as np
 
-from deep_notebooks.data_util import bin_gradient_data
-from deep_notebooks.text_util import get_nlg_phrase, deep_join, fix_sentence, generate_from_file
+from src.data_util import bin_gradient_data
+from src.text_util import get_nlg_phrase, deep_join, fix_sentence, generate_from_file
 
 
 EXPLANATION_VECTOR_NLG = ['deep_notebooks/grammar', 'explanation_vector_description.nlg']

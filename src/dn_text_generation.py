@@ -19,11 +19,11 @@ from spn.algorithms.Gradient import conditional_gradient
 from spn.algorithms.MPE import mpe, predict_mpe
 from spn.algorithms.TransformStructure import Copy, assign_ids
 
-import deep_notebooks.ba_functions as f
-import deep_notebooks.dn_plot as p
-from deep_notebooks.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
-import deep_notebooks.explanation_vector_grammar as expl_vec_grammar
-from deep_notebooks.nalgene.generate import fix_sentence, generate_from_file
+import src.ba_functions as f
+import src.dn_plot as p
+from src.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
+import src.explanation_vector_grammar as expl_vec_grammar
+from src.nalgene.generate import fix_sentence, generate_from_file
 
 # GLOBAL SETTINGS FOR THE MODULE
 correlation_threshold = 0.3
