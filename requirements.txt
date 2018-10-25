@@ -1,3 +1,8 @@
 spflow
 numpy
 jupyter
+pandas
+plotly
+ete3
+sklearn
+scipy
