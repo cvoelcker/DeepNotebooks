@@ -102,3 +102,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#
+# DEVELOPMENT
+#
+test_notebook*
+.idea/
+.ipynb_checkpoints/
+
+#
+# DEPLOYMENT
+#
+
+images/*
