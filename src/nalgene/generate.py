@@ -1,4 +1,4 @@
-from deep_notebooks.nalgene.parse import *
+from src.nalgene.parse import *
 import os
 import json
 

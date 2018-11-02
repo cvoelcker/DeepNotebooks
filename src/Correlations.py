@@ -1,7 +1,7 @@
 import numpy as np
 from functools import reduce
 
-from spn.algorithms.stats.Expectations import Expectation, _node_expectation, get_means, get_variances
+from spn.algorithms.stats.Moments import Moment, _node_moment, get_mean, get_variance
 from spn.algorithms.Inference import likelihood
 from spn.algorithms.Marginalization import marginalize
 from spn.algorithms.Condition import condition
@@ -9,7 +9,7 @@ from spn.structure.Base import Leaf, get_nodes_by_type, Sum, Product, eval_spn_b
 
 
 def node_correlation(node, full_scope=0, dtype=np.float64):
-    func = _node_expectation[type(node)]
+    func = _node_moment[type(node)]
     idx = node.scope[0]
     mat = np.zeros((full_scope, full_scope))
     mat[idx, idx] = func(node)
@@ -51,7 +51,7 @@ def get_full_correlation(spn, context):
 def get_correlation_matrix(spn):
     size = len(spn.scope)
     covariance = get_covariance_matrix(spn)
-    sigmas = np.sqrt(get_variances(spn)).reshape(1, size)
+    sigmas = np.sqrt(get_variance(spn)).reshape(1, size)
     sigma_matrix = sigmas.T.dot(sigmas)
     correlations = covariance / sigma_matrix
 
@@ -64,7 +64,7 @@ def get_covariance_matrix(spn):
     means = j_means.diagonal().reshape(1, size)
     squared_means = means.T.dot(means)
     covariance = j_means - squared_means
-    diagonal_correlations = get_variances(spn).reshape(1, size)
+    diagonal_correlations = get_variance(spn).reshape(1, size)
     idx = np.diag_indices_from(covariance)
     covariance[idx] = diagonal_correlations
 
@@ -74,7 +74,7 @@ def get_covariance_matrix(spn):
 def get_categorical_correlation(spn, context):
     categoricals = context.get_categoricals()
     num_features = len(spn.scope)
-    var = get_variances(spn)
+    var = get_variance(spn)
     # all_vars = []
     full_matrix = np.zeros((num_features, num_features))
     full_matrix[:] = np.nan
@@ -89,7 +89,7 @@ def get_categorical_correlation(spn, context):
             query[:, cat] = value
             cond_spn = condition(spn, query)
             prob = likelihood(spn, query)
-            cond_var = get_variances(cond_spn)
+            cond_var = get_variance(cond_spn)
             cat_vars.append(cond_var)
             all_probs.append(prob)
         cat_vars = np.array(cat_vars)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from spn.algorithms.stats.Expectations import get_means, get_variances
+from spn.algorithms.stats.Moments import get_mean, get_variance
 from spn.algorithms.Marginalization import marginalize
 from spn.algorithms.Inference import log_likelihood
 from spn.structure.Base import Sum
@@ -13,11 +13,11 @@ def cluster_anova(spn):
     all_means = []
     all_vars = []
     all_probs = spn.weights
-    real_var = get_variances(spn).reshape(-1)
+    real_var = get_variance(spn).reshape(-1)
 
     for node in spn.root.children:
-        var = get_variances(node).reshape(-1)
-        mean = get_means(node).reshape(-1)
+        var = get_variance(node).reshape(-1)
+        mean = get_mean(node).reshape(-1)
         all_vars.append(var)
         all_means.append(mean)
     all_vars = np.array(all_vars)
@@ -30,11 +30,11 @@ def cluster_anova(spn):
 def cluster_mean_var_distance(nodes, spn):
     all_means = []
     all_vars = []
-    real_var = get_variances(spn).reshape(-1)
-    real_mean = get_means(spn).reshape(-1)
+    real_var = get_variance(spn).reshape(-1)
+    real_mean = get_mean(spn).reshape(-1)
     for node in nodes:
-        var = get_variances(node).reshape(-1)
-        mean = get_means(node).reshape(-1)
+        var = get_variance(node).reshape(-1)
+        mean = get_mean(node).reshape(-1)
         all_vars.append(var)
         all_means.append(mean)
     all_vars = np.array(all_vars)

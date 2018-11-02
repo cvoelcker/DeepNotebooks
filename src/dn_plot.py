@@ -6,10 +6,13 @@ import plotly.plotly as py
 from plotly.graph_objs import Heatmap, Layout, Scatter, Bar, Table, Histogram, ColorBar
 
 import src.ba_graphs as g
+from src.util.spn_util import func_from_spn
 
 from spn.algorithms.Marginalization import marginalize
 from spn.structure.StatisticalTypes import Type
-from spn.algorithms.Inference import likelihood, func_from_spn
+from spn.algorithms.Inference import likelihood
+
+from src.util.spn_util import get_categoricals
 
 
 def plot_marginal(spn, feature_id, dictionary=None, fname=None, detail=100):
@@ -20,7 +23,7 @@ def plot_marginal(spn, feature_id, dictionary=None, fname=None, detail=100):
     # marg = marginalize(spn, scope)
     size = len(spn.scope)
 
-    is_categorical = feature_id in context.get_categoricals()
+    is_categorical = feature_id in get_categoricals(spn, context)
 
     if is_categorical:
         enc = dictionary['features'][feature_id]['encoder'].inverse_transform
@@ -74,7 +77,7 @@ def plot_related_features(spn, featureId_x, featureId_y, detail=100, dictionary=
     # construct the grid
     num_features = len(spn.scope)
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     domain_x = context.get_domains_by_scope([featureId_x])[0]
     domain_y = context.get_domains_by_scope([featureId_y])[0]
     feature_names = context.feature_names

@@ -11,11 +11,9 @@ from spn.algorithms.LeafLearning import learn_leaf_from_context
 from spn.algorithms.LearningWrappers import learn_mspn
 from spn.algorithms.StructureLearning import is_valid
 
-from spn.data.datasets import load_from_csv
-
 from spn.structure.Base import Context
 from spn.structure.leaves.histogram.Histograms import Histogram
-from spn.structure.leaves.piecewise.PiecewiseLinear import PiecewiseLinear
+from spn.structure.leaves.piecewise.PiecewiseLinear import PiecewiseLinear, create_piecewise_leaf
 
 
 def load_from_csv(data_file, header=0):
@@ -45,7 +43,7 @@ def load_from_csv(data_file, header=0):
     idx = df.columns
 
     for id, name in enumerate(idx):
-        if feature_types[id] == Histogram:
+        if feature_types[id] == 'hist':
             lb = LabelEncoder()
             data_dictionary['features'][id]["encoder"] = lb
             df[name] = df[name].astype('category')
@@ -71,7 +69,7 @@ def learn_piecewise_from_file(data_file, header=0, min_instances=25, independenc
     :param histogram: Boolean: use histogram for categorical data?
     :return: a valid spn, a data dictionary
     """
-    data, feature_types, data_dictionary = load_from_csv(data_file, header, histogram)
+    data, feature_types, data_dictionary = load_from_csv(data_file, header)
     feature_classes = [Histogram if name == 'hist' else PiecewiseLinear for name in feature_types]
     context = Context(parametric_types=feature_classes).add_domains(data)
     context.add_feature_names([entry['name']

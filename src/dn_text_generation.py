@@ -10,20 +10,22 @@ from plotly.offline import iplot
 from IPython.display import display, Image
 
 from spn.structure.StatisticalTypes import Type
-from spn.structure.Base import get_size, Leaf, get_spn_depth
-from spn.algorithms.stats.Expectations import get_means, get_variances
-from spn.algorithms.stats.Correlations import get_full_correlation
-from spn.algorithms.stats.ClusterAnalysis import cluster_anova, cluster_mean_var_distance, categorical_nodes_description
+from spn.structure.Base import get_number_of_nodes, Leaf, get_depth
+from spn.algorithms.stats.Moments import get_mean, get_variance
 from spn.algorithms.Inference import log_likelihood
 from spn.algorithms.Gradient import conditional_gradient
-from spn.algorithms.MPE import mpe, predict_mpe
+from spn.algorithms.MPE import mpe
 from spn.algorithms.TransformStructure import Copy, assign_ids
 
 import src.ba_functions as f
 import src.dn_plot as p
-from src.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
 import src.explanation_vector_grammar as expl_vec_grammar
 from src.nalgene.generate import fix_sentence, generate_from_file
+from src.ClusterAnalysis import cluster_anova, cluster_mean_var_distance, categorical_nodes_description
+from src.Correlations import get_full_correlation
+from src.util.spn_util import predict_mpe
+from src.util.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
+
 
 # GLOBAL SETTINGS FOR THE MODULE
 correlation_threshold = 0.3
@@ -173,8 +175,8 @@ def means_table(spn, context):
     evidence_scope = set()
     evidence = None
 
-    means = get_means(spn)
-    vars = get_variances(spn)
+    means = get_mean(spn)
+    vars = get_variance(spn)
     stds = np.sqrt(vars)
     header = ['Feature', 'Mean', 'Variance', 'STD']
     cells = [context.feature_names,
@@ -364,7 +366,7 @@ def get_node_description(spn, parent_node, size):
         assign_ids(node_spn)
         node_dir = dict()
         node_dir['weight'] = parent_node.weights[i] if parent_type == 'Sum' else 1
-        node_dir['size'] = get_size(node) - 1
+        node_dir['size'] = get_number_of_nodes(node) - 1
         node_dir['num_children'] = len(node.children) if not isinstance(node, Leaf) else 0
         node_dir['leaf'] = isinstance(node, Leaf)
         node_dir['type'] = type(node).__name__ + ' Node'
@@ -411,8 +413,8 @@ def show_node_separation(spn, nodes, context):
     else:
         shown_features = features_shown
 
-    node_means = np.array([get_means(node).reshape(-1) for node in nodes])
-    node_vars = np.array([get_variances(node).reshape(-1) for node in nodes])
+    node_means = np.array([get_mean(node).reshape(-1) for node in nodes])
+    node_vars = np.array([get_variance(node).reshape(-1) for node in nodes])
     node_stds = np.sqrt(node_vars)
     names = np.arange(1,len(nodes)+1,1)
     strength_separation = cluster_anova(spn)
