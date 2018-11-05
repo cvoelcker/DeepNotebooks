@@ -7,6 +7,8 @@ from spn.algorithms.Marginalization import marginalize
 from spn.algorithms.Condition import condition
 from spn.structure.Base import Leaf, get_nodes_by_type, Sum, Product, eval_spn_bottom_up
 
+from src.util.spn_util import get_categoricals
+
 
 def node_correlation(node, full_scope=0, dtype=np.float64):
     func = _node_moment[type(node)]
@@ -37,7 +39,7 @@ def sum_correlation(node, children, full_scope=0, dtype=np.float64):
 
 
 def get_full_correlation(spn, context):
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     full_corr = get_correlation_matrix(spn)
     for cat in categoricals:
         full_corr[:, cat] = np.nan
@@ -72,7 +74,7 @@ def get_covariance_matrix(spn):
 
 
 def get_categorical_correlation(spn, context):
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     num_features = len(spn.scope)
     var = get_variance(spn)
     # all_vars = []
@@ -113,7 +115,7 @@ def get_categorical_correlation(spn, context):
 
 
 def get_mutual_information_correlation(spn, context):
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     num_features = len(spn.scope)
 
     correlation_matrix = []

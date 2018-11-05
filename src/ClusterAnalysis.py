@@ -5,6 +5,8 @@ from spn.algorithms.Marginalization import marginalize
 from spn.algorithms.Inference import log_likelihood
 from spn.structure.Base import Sum
 
+from src.util.spn_util import get_categoricals
+
 
 def cluster_anova(spn):
     if not isinstance(spn, Sum):
@@ -15,7 +17,7 @@ def cluster_anova(spn):
     all_probs = spn.weights
     real_var = get_variance(spn).reshape(-1)
 
-    for node in spn.root.children:
+    for node in spn.children:
         var = get_variance(node).reshape(-1)
         mean = get_mean(node).reshape(-1)
         all_vars.append(var)
@@ -45,7 +47,7 @@ def cluster_mean_var_distance(nodes, spn):
 
 
 def categorical_nodes_description(spn, context):
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     num_features = len(spn.scope)
     total_analysis = {}
     for cat in categoricals:

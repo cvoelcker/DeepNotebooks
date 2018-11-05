@@ -21,8 +21,6 @@ def func_from_spn(spn, feature_id):
 
 def predict_mpe(spn, feature_id, query, context):
     query[:, feature_id] = np.nan
-    print(query)
-    print(feature_id)
     return mpe(spn, query, in_place=True)[:, feature_id]
 
 

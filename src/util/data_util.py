@@ -5,6 +5,8 @@ Utils module containing some data utility functions
 """
 import numpy as np
 
+from src.util.spn_util import get_categoricals
+
 
 def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False):
     """
@@ -18,7 +20,7 @@ def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False)
     :return:
     """
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     df_numerical = df.copy(deep=True)
     for i in categoricals:
         transformed = dictionary['features'][i]['encoder'].transform(

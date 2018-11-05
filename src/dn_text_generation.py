@@ -25,6 +25,7 @@ from src.ClusterAnalysis import cluster_anova, cluster_mean_var_distance, catego
 from src.Correlations import get_full_correlation
 from src.util.spn_util import predict_mpe
 from src.util.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
+from src.util.spn_util import get_categoricals
 
 
 # GLOBAL SETTINGS FOR THE MODULE
@@ -52,7 +53,7 @@ explanation_vectors_show = 'all'
 
 Modifier = namedtuple('Modifier', ['strength', 'strength_adv', 'direction', 'neg_pos'])
 
-CORRELATION_NLG = ['deep_notebooks/grammar', 'correlation_description.nlg']
+CORRELATION_NLG = ['src/grammar', 'correlation_description.nlg']
 
 
 def correlation_statement(corr, feature1, feature2):
@@ -206,7 +207,7 @@ def correlation_description(spn, dictionary):
     context = dictionary['context']
     features = context.feature_names
     high_correlation = correlation_threshold
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     non_categoricals = [i for i in spn.scope if i not in categoricals]
     corr = get_full_correlation(spn, context)
     labels = features
@@ -266,7 +267,7 @@ def correlation_description(spn, dictionary):
 
 def categorical_correlations(spn, dictionary):
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     corr = get_full_correlation(spn, context)
     num_features = len(spn.scope)
     feature_names = context.feature_names
@@ -355,7 +356,6 @@ def node_introduction(spn, nodes, context):
 
 
 def get_node_description(spn, parent_node, size):
-    root = spn
     # parent_node.validate()
     parent_type = type(parent_node).__name__
     node_descriptions = dict()
@@ -372,8 +372,8 @@ def get_node_description(spn, parent_node, size):
         node_dir['type'] = type(node).__name__ + ' Node'
         node_dir['split_features'] = [list(c.scope) for c in node.children] if not isinstance(node, Leaf) else node.scope
         node_dir['split_features'].sort(key=lambda x: len(x))
-        node_dir['depth'] = get_spn_depth(node)
-        node_dir['child_depths'] = [get_spn_depth(c) for c in node.children]
+        node_dir['depth'] = get_depth(node)
+        node_dir['child_depths'] = [get_depth(c) for c in node.children]
 
         descriptor = node_dir['type']
         if all((d == 0 for d in node_dir['child_depths'])):
@@ -396,12 +396,11 @@ def get_node_description(spn, parent_node, size):
     nodes.sort(key=lambda x: x['weight'])
     nodes.reverse()
     node_descriptions['nodes'] = nodes
-    spn.root = root
     return node_descriptions
 
 
 def show_node_separation(spn, nodes, context):
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     all_features = spn.scope
     feature_names = context.feature_names
 
@@ -457,7 +456,7 @@ def show_node_separation(spn, nodes, context):
 
 def node_categorical_description(spn, dictionary):
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     feature_names = context.feature_names
 
     enc = [dictionary['features'][cat]['encoder'] for cat in categoricals]
@@ -487,7 +486,7 @@ def node_categorical_description(spn, dictionary):
 
 def classification(spn, numerical_data, dictionary):
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     misclassified = {}
     data_dict = {}
     for i in categoricals:
@@ -506,7 +505,7 @@ def classification(spn, numerical_data, dictionary):
 def describe_misclassified(spn, dictionary, misclassified, data_dict,
                            numerical_data):
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     empty = np.array([[np.nan] * len(spn.scope)])
     for i in categoricals:
         if use_shapley:
@@ -569,7 +568,7 @@ def describe_misclassified(spn, dictionary, misclassified, data_dict,
 
 def explanation_vector_description(spn, dictionary, data_dict, cat_features):
     context = dictionary['context']
-    categoricals = context.get_categoricals()
+    categoricals = get_categoricals(spn, context)
     num_features = len(spn.scope)
     feature_types = context.parametric_types
     domains = context.get_domains_by_scope(spn.scope)
@@ -718,7 +717,6 @@ def explanation_vector(gradients, discretize, data, query, query_dict):
 def explain_misclassified(spn, dictionary, misclassified, categorical, predicted, original):
     k = categorical
     keys = misclassified.keys()
-    root = spn.root
     for i, d in enumerate(misclassified[k]):
         predicted_nodes = f.prediction_nodes(spn, predicted[d:d+1], k)
         sorted_idx = np.argsort(predicted_nodes, axis = 0)
@@ -733,11 +731,11 @@ def explain_misclassified(spn, dictionary, misclassified, categorical, predicted
         proba_summed = np.sum(predicted_nodes[expl])
         prob_pred = 0
         prob_true = 0
-        weights = np.sum([root.weights[i] for i in expl])
+        weights = np.sum([spn.weights[i] for i in expl])
         for j in np.array(expl).reshape(-1):
-            spn.root = root.children[j]
-            prob_pred += np.exp(root.log_weights[j] + spn.marginalize([k]).eval(predicted[d:d+1]))[0]
-            prob_true += np.exp(root.log_weights[j] + spn.marginalize([k]).eval(original[d:d+1]))[0]
+            spn = spn.children[j]
+            prob_pred += np.exp(spn.log_weights[j] + spn.marginalize([k]).eval(predicted[d:d+1]))[0]
+            prob_true += np.exp(spn.log_weights[j] + spn.marginalize([k]).eval(original[d:d+1]))[0]
         prob_pred /= weights
         prob_true /= weights
 
@@ -749,15 +747,12 @@ def explain_misclassified(spn, dictionary, misclassified, categorical, predicted
                 np.round(prob_pred*100, 2),
                 dictionary['features'][k]['encoder'].inverse_transform([int(original[d,k])]),
                 np.round(prob_true*100, 2)))
-        spn.root = root
         feature_contib = f.get_feature_decomposition(spn, k)
         printmd()
 
 
-
-
 def node_correlation(spn, dictionary):
-    all_nodes = list(i for i, node in enumerate(spn.root.children) if get_spn_depth(node) > 1)
+    all_nodes = list(i for i, node in enumerate(spn.children) if get_depth(node) > 1)
 
     if nodes == 'all':
         shown_nodes = all_nodes
@@ -767,9 +762,8 @@ def node_correlation(spn, dictionary):
     else:
         shown_nodes = nodes
 
-    root = spn.root
-    shown_nodes = [spn.root.children[i] for i in shown_nodes]
-    node_descritions = get_node_description(spn, spn.root, len(spn.scope))
+    shown_nodes = [spn.children[i] for i in shown_nodes]
+    node_descritions = get_node_description(spn, spn, len(spn.scope))
     used_descriptions = [node_descritions['nodes'][i] for i, _ in enumerate(shown_nodes)]
     for i, (node, d) in enumerate(zip(shown_nodes, used_descriptions)):
         if not d['quick'] == 'shallow':

@@ -6,7 +6,7 @@ from src.util.data_util import bin_gradient_data
 from src.util.text_util import get_nlg_phrase, deep_join, fix_sentence, generate_from_file
 
 
-EXPLANATION_VECTOR_NLG = ['deep_notebooks/grammar', 'explanation_vector_description.nlg']
+EXPLANATION_VECTOR_NLG = ['src/grammar', 'explanation_vector_description.nlg']
 
 class NodeNotReadyException(Exception):
     pass
