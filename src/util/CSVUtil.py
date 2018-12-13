@@ -72,7 +72,7 @@ def learn_piecewise_from_file(data_file, header=0, min_instances=25, independenc
     data, feature_types, data_dictionary = load_from_csv(data_file, header)
     feature_classes = [Histogram if name == 'hist' else PiecewiseLinear for name in feature_types]
     context = Context(parametric_types=feature_classes).add_domains(data)
-    context.add_feature_names([entry['name']
+    context.feature_names = ([entry['name']
                                   for entry in data_dictionary['features']])
     spn = learn_mspn(data,
                      context,

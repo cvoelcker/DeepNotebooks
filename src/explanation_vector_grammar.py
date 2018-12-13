@@ -149,7 +149,7 @@ class BodyNode(ExplanationNode):
                     will {} the class probability. \n\n'.format(
                 descriptor)
             comp_body = fix_sentence(
-                generate_from_file(*EXPLANATION_VECTOR_NLG))
+                get_nlg_phrase(*EXPLANATION_VECTOR_NLG))
             return ' '.join([comp_main, comp_body])
 
     def description(self, useful_nodes):

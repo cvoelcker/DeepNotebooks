@@ -77,7 +77,6 @@ def get_categorical_correlation(spn, context):
     categoricals = get_categoricals(spn, context)
     num_features = len(spn.scope)
     var = get_variance(spn)
-    # all_vars = []
     full_matrix = np.zeros((num_features, num_features))
     full_matrix[:] = np.nan
 
@@ -119,10 +118,11 @@ def get_mutual_information_correlation(spn, context):
     num_features = len(spn.scope)
 
     correlation_matrix = []
+    print(num_features)
 
     for x in range(num_features):
         if x not in categoricals:
-            correlation_matrix.append([np.nan] * num_features)
+            correlation_matrix.append(np.full((num_features), np.nan))
         else:
             x_correlation = [np.nan] * num_features
             x_range = context.get_domains_by_scope([x])[0]
@@ -133,7 +133,6 @@ def get_mutual_information_correlation(spn, context):
                 if x == y:
                     x_correlation[x] = 1
                     continue
-                #TODO: still need correct code for setting proper array indices
                 spn_y = marginalize(spn, [y])
                 spn_xy = marginalize(spn, [x, y])
                 y_range = context.get_domains_by_scope([y])[0]
@@ -150,7 +149,6 @@ def get_mutual_information_correlation(spn, context):
                 results_xy = results_xy.reshape(len(x_range), len(y_range))
                 results_x = likelihood(spn_x, query_x)
                 results_y = likelihood(spn_y, query_y)
-
                 xx, yy = np.mgrid[0:len(x_range) - 1:len(x_range) * 1j,
                          0:len(y_range) - 1:len(y_range) * 1j]
                 xx = xx.astype(int)
@@ -161,7 +159,7 @@ def get_mutual_information_correlation(spn, context):
                 grid_results_xy = results_xy
 
                 log = np.log(grid_results_xy / (
-                    np.multiply(grid_results_x, grid_results_y)))
+                    np.multiply(grid_results_x, grid_results_y).squeeze()))
                 prod = np.prod(np.array([log, grid_results_xy]), axis=0)
 
                 log_x = np.log(results_x)
@@ -170,8 +168,8 @@ def get_mutual_information_correlation(spn, context):
                 entropy_x = -1 * np.sum(np.multiply(log_x, results_x))
                 entropy_y = -1 * np.sum(np.multiply(log_y, results_y))
 
-                x_correlation.append(np.sum(prod) / np.sqrt(entropy_x * entropy_y))
-            correlation_matrix.append(x_correlation)
+                x_correlation[x] = (np.sum(prod) / np.sqrt(entropy_x * entropy_y))
+            correlation_matrix.append(np.array(x_correlation))
 
     return np.array(correlation_matrix)
 

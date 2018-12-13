@@ -105,6 +105,7 @@ def fix_newlines(sentence):
     return re.sub(r'\s*\\n\s*', '\n\n', sentence).strip()
 
 def fix_spacing(sentence):
+    # print(sentence)
     return re.sub(r'\s+', ' ', sentence)
 
 def generate_from_file(base_dir, filename, root_context=None):
@@ -113,10 +114,6 @@ def generate_from_file(base_dir, filename, root_context=None):
     parsed = parse_file(base_dir, filename)
     parsed.map_leaves(tokenizeLeaf)
     walked_flat, walked_tree = walk_tree(parsed, parsed['%'], root_context['%'])
-    # print(walked_flat)
-    # print('>', fix_sentence(walked_flat.raw_str))
-    # print(walked_tree)
-    # print('-' * 80)
     return parsed, walked_flat, walked_tree
 
 if __name__ == "__main__":

@@ -6,6 +6,8 @@ import numpy as np
 
 from spn.algorithms.Inference import likelihood
 from spn.algorithms.MPE import mpe
+from spn.algorithms.Condition import condition
+from spn.algorithms.Gradient import feature_gradient
 
 from spn.structure.StatisticalTypes import MetaType
 
@@ -26,3 +28,9 @@ def predict_mpe(spn, feature_id, query, context):
 
 def get_categoricals(spn, context):
     return [i for i in spn.scope if context.meta_types[i] == MetaType.DISCRETE]
+
+
+def fast_conditional_gradient(spn, evidence_data, data):
+    cond_spn = condition(spn, evidence_data)
+    gradients = feature_gradient(cond_spn, data)
+    return gradients

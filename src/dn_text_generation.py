@@ -13,7 +13,6 @@ from spn.structure.StatisticalTypes import Type
 from spn.structure.Base import get_number_of_nodes, Leaf, get_depth
 from spn.algorithms.stats.Moments import get_mean, get_variance
 from spn.algorithms.Inference import log_likelihood
-from spn.algorithms.Gradient import conditional_gradient
 from spn.algorithms.MPE import mpe
 from spn.algorithms.TransformStructure import Copy, assign_ids
 
@@ -23,7 +22,7 @@ import src.explanation_vector_grammar as expl_vec_grammar
 from src.nalgene.generate import fix_sentence, generate_from_file
 from src.ClusterAnalysis import cluster_anova, cluster_mean_var_distance, categorical_nodes_description
 from src.Correlations import get_full_correlation
-from src.util.spn_util import predict_mpe
+from src.util.spn_util import predict_mpe, fast_conditional_gradient
 from src.util.text_util import printmd, strip_dataset_name, get_nlg_phrase, deep_join, colored_string
 from src.util.spn_util import get_categoricals
 
@@ -101,7 +100,7 @@ def introduction(spn):
     printmd('# Exploring the {} dataset'.format(strip_dataset_name(spn.name)))
     printmd('''<figure align="right" style="padding: 1em; float:right; width: 300px">
 	<img alt="the logo of TU Darmstadt"
-		src="deep_notebooks/images/tu_logo.gif">
+		src="images/tu_logo.gif">
 	<figcaption><i>Report framework created @ TU Darmstadt</i></figcaption>
         </figure>
 This report describes the dataset {} and contains general statistical
@@ -592,7 +591,7 @@ def explanation_vector_description(spn, dictionary, data_dict, cat_features):
             return None
         conditional_evidence = np.full((1, num_features), np.nan)
         conditional_evidence[:, i] = data[0,i]
-        gradients = conditional_gradient(spn, conditional_evidence, data[query])
+        gradients = fast_conditional_gradient(spn, conditional_evidence, data[query])
         gradients_norm = np.linalg.norm(gradients, axis = 1).reshape(-1,1)
         _gradients = (gradients/gradients_norm)[:,k]
         discretize = np.histogram(_gradients, range=(-1,1), bins = 20)
@@ -629,6 +628,8 @@ def explanation_vector_description(spn, dictionary, data_dict, cat_features):
                 if instance in categoricals:
                     plot_data = []
                     for l in domains[instance]:
+                        test_x = data_dict[i][:,i] == j
+                        test_y = data_dict[i][:,instance] == l
                         query = np.where((data_dict[i][:,i] == j) & (data_dict[i][:,instance] == l))
                         query_dict = {'type': 'categorical',
                                       'class': feature_names[i],
@@ -644,9 +645,14 @@ def explanation_vector_description(spn, dictionary, data_dict, cat_features):
                                       'class_idx': i}
 
                         data = data_dict[i][query]
+
+                        if data.size == 0:
+                            print('No fitting instances found.')
+                            continue
+
                         evidence = np.full((1, data.shape[1]), np.nan)
                         evidence[:, i] = data[0, i]
-                        gradients = conditional_gradient(spn, evidence, data)
+                        gradients = fast_conditional_gradient(spn, evidence, data)
                         gradients_norm = np.linalg.norm(gradients, axis = 1).reshape(-1,1)
                         _gradients = (gradients/gradients_norm)[:,k]
 
@@ -709,8 +715,7 @@ def explanation_vector(gradients, discretize, data, query, query_dict):
         header = '##### Predictive categorical feature "{}": "{}"\n\n'.format(
                 query_dict['feature'], query_dict['feature_instance'])
     else:
-        header = '##### Predictive {} feature "{}"\n\n'.format(
-                query_dict['type'], query_dict['feature'])
+        header = '##### Predictive feature "{}"\n\n'.format(query_dict['feature'])
     return header, description_tree.get_text(), data
 
 

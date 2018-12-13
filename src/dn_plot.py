@@ -94,14 +94,12 @@ def plot_related_features(spn, featureId_x, featureId_y, detail=100, dictionary=
         x_detail = len(domain_x)
         enc = dictionary['features'][featureId_x]['encoder'].inverse_transform
         x_range = domain_x
-        print([int(x) for x in x_range])
-        x_names = enc(x_range)
+        x_names = enc([int(x) for x in x_range])
     if featureId_y in categoricals:
         y_cat = True
         y_detail = len(domain_y)
         enc = dictionary['features'][featureId_y]['encoder'].inverse_transform
         y_range = domain_y
-        print(y_range)
         y_names = enc([int(y) for y in y_range])
     grid = np.mgrid[x_range[0]:x_range[-1]:x_detail*1j, y_range[0]:y_range[-1]:y_detail*1j]
     grid = grid.reshape(2,-1).T
