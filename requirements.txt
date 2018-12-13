@@ -4,5 +4,6 @@ jupyter
 pandas
 plotly==2.4.1
 ete3
+pyqt
 sklearn
 scipy
