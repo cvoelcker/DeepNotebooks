@@ -124,7 +124,7 @@ def data_description(context, df):
     :param df: np.array: the data
     :return: a textual data description
     '''
-    num_features = len(context.parametric_types)
+    num_features = len(spn.scope)
     feature_names = context.feature_names
     feature_types = context.parametric_types
     printmd('')
@@ -169,7 +169,7 @@ def data_description(context, df):
 
 
 def means_table(spn, context):
-    num_features = len(context.parametric_types)
+    num_features = len(spn.scope)
 
     feature_scope = set((i for i, _ in enumerate(context.feature_names)))
     evidence_scope = set()
