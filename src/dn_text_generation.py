@@ -124,7 +124,7 @@ def data_description(context, df):
     :param df: np.array: the data
     :return: a textual data description
     '''
-    num_features = len(spn.scope)
+    num_features = len(context.feature_names)
     feature_names = context.feature_names
     feature_types = context.parametric_types
     printmd('')

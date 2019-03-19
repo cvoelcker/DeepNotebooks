@@ -7,6 +7,8 @@ import numpy as np
 from spn.algorithms.Inference import likelihood
 from spn.algorithms.MPE import mpe
 from spn.algorithms.Condition import condition
+import spn.algorithms.Gradient
+print(spn.algorithms.Gradient.__file__)
 from spn.algorithms.Gradient import feature_gradient
 
 from spn.structure.StatisticalTypes import MetaType
