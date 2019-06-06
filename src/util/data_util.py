@@ -23,15 +23,17 @@ def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False)
     categoricals = get_categoricals(spn, context)
     df_numerical = df.copy(deep=True)
     for i in categoricals:
+        non_nan = np.where(~np.isnan(df_numerical.iloc[:, i]))
         transformed = dictionary['features'][i]['encoder'].transform(
-            df_numerical.values[:, i])
-        df_numerical.iloc[:, i] = transformed
+            df_numerical.values[non_nan, i].squeeze())
+        df_numerical.iloc[non_nan[0], i] = transformed
 
     numerical_data = df_numerical.values.astype(float)
 
     categorical_data = {}
     for i in categoricals:
-        data = df_numerical.groupby(context.feature_names[i])
+        non_nan = np.where(~np.isnan(df_numerical.iloc[:, i]))
+        data = df_numerical.iloc[non_nan].groupby(context.feature_names[i])
         data = [data.get_group(x).values.astype(float) for x in data.groups]
         categorical_data[i] = data
 

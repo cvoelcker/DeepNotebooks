@@ -16,22 +16,31 @@ from spn.structure.leaves.histogram.Histograms import Histogram
 from spn.structure.leaves.piecewise.PiecewiseLinear import PiecewiseLinear, create_piecewise_leaf
 
 
-def load_from_csv(data_file, header=0, categorical_columns=[]):
+def load_from_csv(data_file, header=0, categorical_columns=[], feature_file=None):
     df = pd.read_csv(data_file, delimiter=",", header=header)
     # df = df.dropna(axis=0, how='any')
 
     feature_names = df.columns.values.tolist() if header == 0 else [
         "X_{}".format(i) for i in range(len(df.columns))]
-
+    
     dtypes = df.dtypes
     feature_types = []
     for i, feature_type in enumerate(dtypes):
         if i in categorical_columns:
-            feture_types.append('hist')
+            feature_types.append('hist')
+        elif feature_type.kind == 'i':
+            feature_types.append('hist')
         elif feature_type.kind == 'O':
             feature_types.append('hist')
         else:
             feature_types.append('piecewise')
+
+    if feature_file:
+        feature_types = []
+        with open(feature_file, 'r') as ff:
+            for line in ff.readlines():
+                type_info = line.strip('\n').split(',')[1]
+                feature_types.append('hist' if type_info == 'cat' else 'piecewise')
 
     data_dictionary = {
         'features': [{"name": name,
@@ -48,10 +57,10 @@ def load_from_csv(data_file, header=0, categorical_columns=[]):
         if feature_types[id] == 'hist':
             lb = LabelEncoder()
             data_dictionary['features'][id]["encoder"] = lb
-            df[name] = df[name].astype('category')
-            df[name] = lb.fit_transform(df[name])
+            # df[name] = df[name].astype('category')
+            df[name][~np.isnan(df[name])] = lb.fit_transform(df[name][~np.isnan(df[name])])
             data_dictionary['features'][id]["values"] = lb.transform(
-                lb.classes_)
+                lb.classes_[~np.isnan(lb.classes_)])
         if dtypes[id].kind == 'M':
             df[name] = (df[name] - df[name].min()) / np.timedelta64(1, 'D')
 
@@ -60,7 +69,7 @@ def load_from_csv(data_file, header=0, categorical_columns=[]):
     return data, feature_types, data_dictionary
 
 
-def learn_piecewise_from_file(data_file, header=0, min_instances=25, independence_threshold=0.1):
+def learn_piecewise_from_file(data_file, header=0, min_instances=25, independence_threshold=0.1, feature_file=None):
     """
     Learning wrapper for automatically building an SPN from a datafile
 
@@ -71,9 +80,10 @@ def learn_piecewise_from_file(data_file, header=0, min_instances=25, independenc
     :param histogram: Boolean: use histogram for categorical data?
     :return: a valid spn, a data dictionary
     """
-    data, feature_types, data_dictionary = load_from_csv(data_file, header)
+    data, feature_types, data_dictionary = load_from_csv(data_file, header, feature_file=feature_file)
     feature_classes = [Histogram if name == 'hist' else PiecewiseLinear for name in feature_types]
     context = Context(parametric_types=feature_classes).add_domains(data)
+
     context.feature_names = ([entry['name']
                                   for entry in data_dictionary['features']])
     spn = learn_mspn_with_missing(data,
@@ -82,7 +92,7 @@ def learn_piecewise_from_file(data_file, header=0, min_instances=25, independenc
                      threshold=independence_threshold,
                      rows='rdc',
                      ohe=False,
-                     leaves=learn_leaf_from_context)
+                     leaves=create_piecewise_leaf)
     assert is_valid(spn), 'No valid spn could be created from datafile'
     data_dictionary['context'] = context
     return spn, data_dictionary

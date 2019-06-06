@@ -153,7 +153,6 @@ def learn_with_cross_valid(search_grid, dataset="data/iris", header=0, date=None
     spns = np.array([[learn_spn(dataset=dataset, precision=i, independence=j, header=header, date=date, isotonic=isotonic)[0] for i in precisions] for j in independencies])
     log_likelihood = np.array([[np.sum(s.root.eval(valid)) for s in spn] for spn in spns])
     max_idx = np.unravel_index(np.argmax(log_likelihood), log_likelihood.shape)
-    print(max_idx)
     
     return spns[max_idx], d, log_likelihood[max_idx]
 
@@ -372,9 +371,7 @@ def get_node_feature_probability(spn, featureIdx, instance):
     root = spn.root
     probabilities = np.array([])
     for c in spn.root.children:
-        # print("x")
         spn.root = c
-        # print(func_from_spn(spn, featureIdx)(instance))
         probabilities = np.append(probabilities, np.exp(func_from_spn(spn, featureIdx)(instance)))
         spn.root = root
     return probabilities
@@ -382,7 +379,6 @@ def get_node_feature_probability(spn, featureIdx, instance):
 def calculate_overlap(inv, invs, area=0.9):
     overlap = []
     for i in invs:
-        #print(overlap)
         covered = 0
         smaller = inv if inv[0] < i[0] else i
         bigger = inv if smaller == i else i
@@ -645,8 +641,6 @@ def get_categorical_correlation(spn):
         cat_vars = np.array(cat_vars)
         all_probs = np.array(all_probs).reshape(-1, 1)
         total_var = np.sum(cat_vars * all_probs, axis = 0)
-        #print(total_var)
-        #print(var)
         result = 1 - (total_var/var)
         all_vars.append(result)
     all_vars = np.array(all_vars)

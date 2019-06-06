@@ -115,3 +115,5 @@ test_notebook*
 #
 
 images/*
+
+example_data/top20*
