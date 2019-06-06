@@ -9,6 +9,8 @@ from spn.structure.Base import Leaf, get_nodes_by_type, Sum, Product, eval_spn_b
 
 from src.util.spn_util import get_categoricals
 
+import tqdm
+
 
 def node_correlation(node, full_scope=0, dtype=np.float64):
     func = _node_moment[type(node)]
@@ -47,6 +49,7 @@ def get_full_correlation(spn, context):
     cat_corr = get_categorical_correlation(spn, context)
     cat_cat_corr = get_mutual_information_correlation(spn, context)
     result = np.nansum([full_corr, cat_corr, cat_cat_corr], axis = 0)
+    print(result)
     return result
 
 
@@ -118,7 +121,6 @@ def get_mutual_information_correlation(spn, context):
     num_features = len(spn.scope)
 
     correlation_matrix = []
-    print(num_features)
 
     for x in range(num_features):
         if x not in categoricals:
@@ -167,10 +169,10 @@ def get_mutual_information_correlation(spn, context):
 
                 entropy_x = -1 * np.sum(np.multiply(log_x, results_x))
                 entropy_y = -1 * np.sum(np.multiply(log_y, results_y))
-
-                x_correlation[x] = (np.sum(prod) / np.sqrt(entropy_x * entropy_y))
+                
+                x_correlation[y] = (np.sum(prod) / np.sqrt(entropy_x * entropy_y))
             correlation_matrix.append(np.array(x_correlation))
-
+    print(np.array(correlation_matrix))
     return np.array(correlation_matrix)
 
 

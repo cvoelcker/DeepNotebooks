@@ -324,7 +324,6 @@ def plot_decision_boundary(spn, featureX, featureY, categoricalId, featureNames,
     query[:,featureX] = grid[:,0]
     query[:,featureY] = grid[:,1]
     for i in range(categorical_range[0], categorical_range[1] + 1):
-        print(i)
         fig = plt.figure()
         ax = fig.add_subplot(111)
         query[:,categoricalId] = i
@@ -459,20 +458,34 @@ def plot_explanation_vectors(gradients, discretize):
     return {'data': data, 'layout': layout}
 
 
-def plot_cat_explanation_vector(plot_data):
+def plot_cat_explanation_vector(plot_data, color = None):
     data = []
     # dirty hack which produces the centers for the bar chart
     x = (np.arange(10)-4.5)/5
-    for plot in plot_data:
+    for i, plot in enumerate(plot_data):
         binsize = plot[1][1][1] - plot[1][1][0]
-        data.append(Histogram(x=plot[0],
-                  autobinx=False,
-                  name = plot[2],
-                  xbins=dict(
-                      start=plot[1][1][0],
-                      end=plot[1][1][-1],
-                      size=binsize,
-                  )))
+        if color is not None:
+            hist = Histogram(x=plot[0],
+                      autobinx=False,
+                      name = plot[2],
+                      xbins=dict(
+                          start=plot[1][1][0],
+                          end=plot[1][1][-1],
+                          size=binsize,
+                      ),
+                      marker=dict(
+                        color=color[i]
+                      ))
+        else:
+            hist = Histogram(x=plot[0],
+                      autobinx=False,
+                      name = plot[2],
+                      xbins=dict(
+                          start=plot[1][1][0],
+                          end=plot[1][1][-1],
+                          size=binsize,
+                      ))
+        data.append(hist)
 
     layout = dict(width=450, height=450, barmode='stack')
     return {'data': data, 'layout': layout}
