@@ -49,7 +49,6 @@ def get_full_correlation(spn, context):
     cat_corr = get_categorical_correlation(spn, context)
     cat_cat_corr = get_mutual_information_correlation(spn, context)
     result = np.nansum([full_corr, cat_corr, cat_cat_corr], axis = 0)
-    print(result)
     return result
 
 
@@ -172,7 +171,6 @@ def get_mutual_information_correlation(spn, context):
                 
                 x_correlation[y] = (np.sum(prod) / np.sqrt(entropy_x * entropy_y))
             correlation_matrix.append(np.array(x_correlation))
-    print(np.array(correlation_matrix))
     return np.array(correlation_matrix)
 
 
