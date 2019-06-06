@@ -8,7 +8,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 from spn.algorithms.LeafLearning import learn_leaf_from_context
-from spn.algorithms.LearningWrappers import learn_mspn
+from spn.algorithms.LearningWrappers import learn_mspn, learn_mspn_with_missing
 from spn.algorithms.StructureLearning import is_valid
 
 from spn.structure.Base import Context
@@ -16,17 +16,19 @@ from spn.structure.leaves.histogram.Histograms import Histogram
 from spn.structure.leaves.piecewise.PiecewiseLinear import PiecewiseLinear, create_piecewise_leaf
 
 
-def load_from_csv(data_file, header=0):
+def load_from_csv(data_file, header=0, categorical_columns=[]):
     df = pd.read_csv(data_file, delimiter=",", header=header)
-    df = df.dropna(axis=0, how='any')
+    # df = df.dropna(axis=0, how='any')
 
     feature_names = df.columns.values.tolist() if header == 0 else [
         "X_{}".format(i) for i in range(len(df.columns))]
 
     dtypes = df.dtypes
     feature_types = []
-    for feature_type in dtypes:
-        if feature_type.kind == 'O':
+    for i, feature_type in enumerate(dtypes):
+        if i in categorical_columns:
+            feture_types.append('hist')
+        elif feature_type.kind == 'O':
             feature_types.append('hist')
         else:
             feature_types.append('piecewise')
@@ -74,12 +76,13 @@ def learn_piecewise_from_file(data_file, header=0, min_instances=25, independenc
     context = Context(parametric_types=feature_classes).add_domains(data)
     context.feature_names = ([entry['name']
                                   for entry in data_dictionary['features']])
-    spn = learn_mspn(data,
+    spn = learn_mspn_with_missing(data,
                      context,
                      min_instances_slice=min_instances,
                      threshold=independence_threshold,
+                     rows='rdc',
                      ohe=False,
-                     leaves=create_piecewise_leaf)
+                     leaves=learn_leaf_from_context)
     assert is_valid(spn), 'No valid spn could be created from datafile'
     data_dictionary['context'] = context
     return spn, data_dictionary
