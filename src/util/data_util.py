@@ -8,7 +8,7 @@ import numpy as np
 from src.util.spn_util import get_categoricals
 
 
-def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False):
+def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False, assert_nan=False):
     """
 
     :param spn:
@@ -23,10 +23,13 @@ def get_categorical_data(spn, df, dictionary, header=1, types=False, date=False)
     categoricals = get_categoricals(spn, context)
     df_numerical = df.copy(deep=True)
     for i in categoricals:
-        non_nan = np.where(~np.isnan(df_numerical.iloc[:, i]))
+        if df_numerical.iloc[:, i].isnull().values.any():
+            non_nan = np.where(~np.isnan(df_numerical.iloc[:, i]))
+        else:
+            non_nan = np.arange(df_numerical.iloc[:, i].size)
         transformed = dictionary['features'][i]['encoder'].transform(
             df_numerical.values[non_nan, i].squeeze())
-        df_numerical.iloc[non_nan[0], i] = transformed
+        df_numerical.iloc[non_nan, i] = transformed
 
     numerical_data = df_numerical.values.astype(float)
 

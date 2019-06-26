@@ -58,9 +58,14 @@ def load_from_csv(data_file, header=0, categorical_columns=[], feature_file=None
             lb = LabelEncoder()
             data_dictionary['features'][id]["encoder"] = lb
             # df[name] = df[name].astype('category')
-            df[name][~np.isnan(df[name])] = lb.fit_transform(df[name][~np.isnan(df[name])])
-            data_dictionary['features'][id]["values"] = lb.transform(
-                lb.classes_[~np.isnan(lb.classes_)])
+            if df[name].isnull().values.any():
+                df[name][~np.isnan(df[name])] = lb.fit_transform(df[name][~np.isnan(df[name])])
+                data_dictionary['features'][id]["values"] = lb.transform(
+                    lb.classes_[~np.isnan(lb.classes_)])
+            else:
+                df[name] = lb.fit_transform(df[name])
+                data_dictionary['features'][id]["values"] = lb.transform(
+                    lb.classes_)
         if dtypes[id].kind == 'M':
             df[name] = (df[name] - df[name].min()) / np.timedelta64(1, 'D')
 
