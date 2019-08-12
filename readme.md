@@ -18,8 +18,19 @@ GitHub: https://github.com/alejandromolinaml/SPFlow
 
 Website: https://ml-research.github.io/
 
-## Relevant publications
+## Relevant publications and citation
 - Völcker, Claas "Interactive data analysis using Sum-Product Networks", bachelor's thesis at TU Darmstadt, 2018, available here: https://userdata.d120.de/cvoelcker/thesis.pdf
+- Claas Völcker, Alejandro Molina, Johannes Neumann, Dirk Westermann and Kristian Kersting. "DeepNotebooks: Deep Probabilistic Models Construct Python Notebooks for Reporting Datasets" In "Automating Data Science 2019"
+
+## Citation
+If you find DeepNotebooks useful, please cite us in your work:
+```
+@misc{Voelcker2019deepnotebooks,
+  Author = {Völcker, Claas; Molina, Alejandro; Neumann, Johannes, Westermann, Dirk; Kersting, Kristian},
+  Title = {DeepNotebooks: Deep Probabilistic Models Construct Python Notebooks for Reporting Datasets},
+  Year = {2019},
+  }
+```
 
 ## Acknowledgements
 see https://github.com/alejandromolinaml/SPFlow
