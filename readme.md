@@ -25,7 +25,15 @@ Website: https://ml-research.github.io/
 ## Citation
 If you find DeepNotebooks useful, please cite us in your work:
 ```
-@incollection{voelker2019ads, year = { 2019 }, crossref = { https://github.com/cvoelcker/DeepNotebooks }, title = { DeepNotebooks: Deep Probabilistic Models Construct Python Notebooks for Reporting Datasets }, pages = { }, booktitle = { Working Notes of the ECML PKDD 2019 Workshop on Automating Data Science (ADS) }, author = { Claas Voelcker and Alejandro Molina and Johannes Neumann and Dirk Westermann and and Kristian Kersting } }```
+@incollection{
+voelker2019ads, 
+year = { 2019 }, 
+crossref = { https://github.com/cvoelcker/DeepNotebooks }, 
+title = { DeepNotebooks: Deep Probabilistic Models Construct Python Notebooks for Reporting Datasets }, 
+pages = { }, 
+booktitle = { Working Notes of the ECML PKDD 2019 Workshop on Automating Data Science (ADS) }, 
+author = { Claas Voelcker and Alejandro Molina and Johannes Neumann and Dirk Westermann and and Kristian Kersting } }
+```
 
 ## Acknowledgements
 see https://github.com/alejandromolinaml/SPFlow
